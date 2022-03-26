@@ -43,6 +43,23 @@ class Excel:
     def filling_in_data(self, cell, value):
         self.ws[cell].value = value
 
+    def fill_in_requirement(self, data_from_parsing):
+        try:
+            for row_number in range(len(data_from_parsing)):
+                    self.filling_in_data(f'A{row_number + 2}', data_from_parsing[row_number]['name'])
+                    if data_from_parsing[row_number]["salary"] is not None:
+                        if data_from_parsing[row_number]["salary"]["to"] is not None:
+                            self.filling_in_data(f'B{row_number + 2}', f'{data_from_parsing[row_number]["salary"]["from"]} - {data_from_parsing[row_number]["salary"]["to"]} {data_from_parsing[row_number]["salary"]["currency"]}')
+                        else:
+                            self.filling_in_data(f'B{row_number + 2}', f'{data_from_parsing[row_number]["salary"]["from"]} {data_from_parsing[row_number]["salary"]["currency"]}')
+                    elif data_from_parsing[row_number]["salary"] is None:
+                        self.filling_in_data(f'B{row_number + 2}', 'з/п не указана')
+                    self.filling_in_data(f'C{row_number + 2}', data_from_parsing[row_number]['snippet']['requirement'])
+                    self.filling_in_data(f'D{row_number + 2}', data_from_parsing[row_number]['snippet']['responsibility'])
+                    self.filling_in_data(f'E{row_number + 2}', data_from_parsing[row_number]['alternate_url'])
+        except:
+            pass
+
     def save(self):
         self.wb.save(f"Парсинг за {self.date_and_time}.xlsx")
 
@@ -58,26 +75,10 @@ class Robot:
         self.date_and_time = now.strftime("%d.%m.%y %H_%M")
 
     def start(self):
-
         parser = Parser(self.text)
-        ps = parser.parsing()
+        data_from_parsing = parser.parsing()
         excel = Excel(self.date_and_time)
-        for i in range(len(ps)):
-            try:
-                excel.filling_in_data(f'A{i + 2}', ps[i]['name'])
-                if ps[i]["salary"] is not None:
-                    if ps[i]["salary"]["to"] is not None:
-                        excel.filling_in_data(f'B{i + 2}', f'{ps[i]["salary"]["from"]} - {ps[i]["salary"]["to"]} {ps[i]["salary"]["currency"]}')
-                    else:
-                        excel.filling_in_data(f'B{i + 2}', f'{ps[i]["salary"]["from"]} {ps[i]["salary"]["currency"]}')
-                elif ps[i]["salary"] is None:
-                    excel.filling_in_data(f'B{i + 2}', 'Не указано')
-                excel.filling_in_data(f'C{i + 2}', ps[i]['snippet']['requirement'])
-                excel.filling_in_data(f'D{i + 2}', ps[i]['snippet']['responsibility'])
-                excel.filling_in_data(f'E{i + 2}', ps[i]['alternate_url'])
-                time.sleep(0.5)
-            except:
-                pass
+        excel.fill_in_requirement(data_from_parsing)
         excel.save()
 
 

@@ -5,3 +5,5 @@
 /testing.py
 /*.xlsx
 /.idea
+/font
+/__pycache__
